@@ -1,3 +1,5 @@
+require './lib/translator'
+
 module ParaMorse
 
   class Queue
@@ -52,5 +54,12 @@ module ParaMorse
     end
   end
 
+  class Encoder
+    include Translator
+    def encode(letter)
+      eng_to_morse_translator[letter]
+    end
+
+  end
 
 end

@@ -1,4 +1,4 @@
-require "./lib/queue"
+require "./lib/paramorse"
 require "./test/test_helper"
 
 class TestQueue < Minitest::Test
