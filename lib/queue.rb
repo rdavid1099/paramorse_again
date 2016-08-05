@@ -24,7 +24,7 @@ module ParaMorse
       amount.times do
         popped_elements << queue.shift
       end
-      popped_elements
+      popped_elements.reverse
     end
 
     def peek(amount = 1)
@@ -47,8 +47,10 @@ module ParaMorse
       queue.length
     end
 
+    def clear
+      @queue = Array.new
+    end
   end
-
 
 
 end

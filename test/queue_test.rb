@@ -90,7 +90,18 @@ class TestQueue < Minitest::Test
     queue.push("0")
     queue.push("1")
     assert_equal ["0","1","5"], queue.pop(3)
-    assert_equal 3, queue.count    
+    assert_equal 3, queue.count
+  end
+
+  def test_queue_can_be_cleared
+    queue = ParaMorse::Queue.new
+    queue.push("1")
+    queue.push("0")
+    queue.push("5")
+
+    assert_equal 3, queue.count
+    queue.clear
+    assert_equal 0, queue.count
   end
 
 end
