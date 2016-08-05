@@ -2,6 +2,44 @@ require './lib/translator'
 
 module ParaMorse
 
+  class StreamDecoder
+    attr_reader :queue,
+                :decoder
+
+    def initialize
+      @queue = Queue.new
+      @decoder = Decoder.new
+    end
+
+    def receive(digit)
+      queue.push(digit.to_s[0])
+    end
+
+    def decode
+      morse_to_decode = queue.pop_all
+      decoder.decode(morse_to_decode)
+    end
+  end
+
+  class StreamEncoder
+    attr_reader :queue,
+                :encoder
+
+    def initialize
+      @queue = Queue.new
+      @encoder = Encoder.new
+    end
+
+    def receive(letter)
+      queue.push(letter.to_s[0])
+    end
+
+    def encode
+      words_to_encode = queue.pop_all
+      encoder.encode(words_to_encode)
+    end
+  end
+
   class Decoder
     attr_reader :letter_decoder
 
@@ -38,9 +76,7 @@ module ParaMorse
         [morse]
       end
     end
-
   end
-
 
   class Encoder
     attr_reader :letter_encoder
@@ -82,7 +118,6 @@ module ParaMorse
     def split_into_letters(word)
       word.chars
     end
-
   end
 
   class LetterEncoder
@@ -144,6 +179,12 @@ module ParaMorse
         popped_elements << queue.shift
       end
       popped_elements.reverse
+    end
+
+    def pop_all
+      elements = queue.join
+      clear
+      elements
     end
 
     def peek(amount = 1)
