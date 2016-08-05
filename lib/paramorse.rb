@@ -48,7 +48,8 @@ module ParaMorse
     end
 
     def decode(morse)
-      morse_words = split_morse_words(morse)
+      morse_segments = split_morse_lines(morse)
+      morse_words = split_morse_segments(morse_segments)
       morse_words.map do |word|
         decode_morse_words(word)
       end.join
@@ -59,6 +60,20 @@ module ParaMorse
       morse_letters.map do |morse_letter|
         letter_decoder.decode(morse_letter)
       end.join
+    end
+
+    def split_morse_lines(morse)
+      return [morse] unless morse.include?("\n")
+      morse.split("\n").reduce([]) do |result, word|
+        result << word
+        result << "\n"
+      end
+    end
+
+    def split_morse_segments(morse_segments)
+      morse_segments.map do |segment|
+        split_morse_words(segment)
+      end.flatten
     end
 
     def split_morse_words(words)
@@ -86,7 +101,8 @@ module ParaMorse
     end
 
     def encode(statement)
-      words = split_words(statement)
+      segments = split_statement_by_new_lines(statement)
+      words = split_segments(segments)
       words.map do |word|
         encode_word(word)
       end.join
@@ -101,10 +117,25 @@ module ParaMorse
 
     def encode_letter_with_placement(letter, index, word)
       unless index == word.length - 1
-        "#{letter_encoder.encode(letter)}000"
+       "#{letter_encoder.encode(letter)}000"
       else
-        letter_encoder.encode(letter)
+       letter_encoder.encode(letter)
       end
+    end
+
+    def split_statement_by_new_lines(statement)
+      return [statement] unless statement.include?("\n")
+      return ["\n"] if statement.include?("\n") && statement.length == 1
+      statement.split("\n").reduce([]) do |result, words|
+        result << words
+        result << "\n"
+      end
+    end
+
+    def split_segments(segments)
+      segments.map do |segment|
+        split_words(segment)
+      end.flatten
     end
 
     def split_words(words)
@@ -150,6 +181,63 @@ module ParaMorse
     def valid_morse?(morse)
       morse.chars.all? do |character|
         character == "0" || character == "1"
+      end
+    end
+  end
+
+  class FileDecoder
+    attr_reader :decoder
+
+    def initialize
+      @decoder = Decoder.new
+    end
+
+    def decode(encoded_filename, decoded_output_filename)
+      contents = decode_file_contents(encoded_filename)
+      write_file(decoded_output_filename, contents)
+    end
+
+    def decode_file_contents(encoded_filename)
+      contents = read_file_to_be_decoded(encoded_filename)
+      decoder.decode(contents)
+    end
+
+    def read_file_to_be_decoded(encoded_filename)
+      File.read("./encoded_files/#{encoded_filename}")
+    end
+
+    def write_file(filename, contents)
+      File.open("./decoded_files/#{filename}", "w") do |file|
+        file.write(contents)
+      end
+    end
+
+  end
+
+  class FileEncoder
+    attr_reader :encoder
+
+    def initialize
+      @encoder = Encoder.new
+    end
+
+    def encode(origin_filename, encoded_filename)
+      contents = encode_file_contents(origin_filename)
+      write_file(encoded_filename, contents)
+    end
+
+    def encode_file_contents(origin_filename)
+      contents = read_file_to_be_encoded(origin_filename)
+      encoder.encode(contents)
+    end
+
+    def read_file_to_be_encoded(origin_filename)
+      File.read("./original_files/#{origin_filename}")
+    end
+
+    def write_file(filename, contents)
+      File.open("./encoded_files/#{filename}", "w") do |file|
+        file.write(contents)
       end
     end
   end

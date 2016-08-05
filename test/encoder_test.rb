@@ -15,25 +15,6 @@ class TestEncoder < Minitest::Test
     assert_equal ["H","I"], encoder.split_into_letters("HI")
   end
 
-  def test_encoder_returns_correct_character_depending_on_character_position_in_string
-    encoder = ParaMorse::Encoder.new
-    word1 = ["h","e","l","l","o"]
-
-    assert_equal "1010101000", encoder.encode_letter_with_placement("h", 0, word1)
-    assert_equal "1000", encoder.encode_letter_with_placement("e", 1, word1)
-    assert_equal "11101110111", encoder.encode_letter_with_placement("o", 4, word1)
-  end
-
-  def test_encoder_analyzes_correct_character_placement_for_longer_word
-    encoder = ParaMorse::Encoder.new
-    word2 = ["m","e","t","a","l","l","i","c","a"]
-
-    assert_equal "111000", encoder.encode_letter_with_placement("T", 2, word2)
-    assert_equal "1000", encoder.encode_letter_with_placement("e", 1, word2)
-    assert_equal "10111000", encoder.encode_letter_with_placement("a", 3, word2)
-    assert_equal "10111", encoder.encode_letter_with_placement("a", 8, word2)
-  end
-
   def test_encoder_can_encode_a_simple_word
     encoder = ParaMorse::Encoder.new
 
@@ -79,4 +60,32 @@ class TestEncoder < Minitest::Test
     assert_equal expected, actual
   end
 
+  def test_encoder_splits_new_lines
+    encoder = ParaMorse::Encoder.new
+    sentence = "This sentence,
+has a lot
+of new
+lines."
+    expected = ["This sentence,","\n","has a lot","\n","of new","\n","lines.","\n"]
+    actual = encoder.split_statement_by_new_lines(sentence)
+
+    assert_equal expected, actual
+  end
+
+  def test_encoder_can_handle_a_single_new_line
+    encoder = ParaMorse::Encoder.new
+    sentence = "\n"
+    expected = ["\n"]
+    actual = encoder.split_statement_by_new_lines(sentence)
+
+    assert_equal expected, actual
+  end
+
+  def test_encoder_can_handle_sentence_with_new_lines
+    encoder = ParaMorse::Encoder.new
+    expected = "1011101110001000101110101000111010111010001110111011100011101110001000111011101010111011100000001110111000111010111011100000001010111010001011101000101000100011101000111010100011101110101011101110000000\n10111011100010001011101010001110101110100011101110111000111011100010000000111000111011101110000000111000101010100010000000111011100010111000111010111010001010101000101000111010001000!0000000\n"
+    actual = encoder.encode("Welcome, my friend,\nwelcome to the machine!")
+
+    assert_equal expected, actual
+  end
 end

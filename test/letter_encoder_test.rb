@@ -53,4 +53,10 @@ class TestLetterEncoder < Minitest::Test
     assert_equal "ä", letter_encoder.encode("ä")
   end
 
+  def test_encoder_can_handle_new_lines
+    letter_encoder = ParaMorse::LetterEncoder.new
+
+    assert_equal "\n", letter_encoder.encode("\n")
+  end
+
 end
