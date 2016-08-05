@@ -50,4 +50,14 @@ class TestFileDecoder < Minitest::Test
 
     assert_equal expected, File.read("./decoded_files/test_plain_output.txt")
   end
+
+  def test_file_decoder_can_handle_larger_news_stories
+    file_enc = ParaMorse::FileEncoder.new
+    file_dec = ParaMorse::FileDecoder.new
+    file_enc.encode("test_large_news_file.txt", "test_large_news_file_encoded.txt")
+    expected = "Washington (CNN) - Donald Trump backed off a false claim Friday morning, admitting he had not seen a video of a $400 million payment being unloaded from a US plane in Iran.".downcase
+    file_dec.decode("test_large_news_file_encoded.txt", "test_large_news_output.txt")
+
+    assert_equal expected, File.read("./decoded_files/test_large_news_output.txt")[0..171]
+  end
 end
