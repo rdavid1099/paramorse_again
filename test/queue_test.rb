@@ -104,4 +104,12 @@ class TestQueue < Minitest::Test
     assert_equal 0, queue.count
   end
 
+  def test_queue_can_pop_all_to_a_string
+    queue = ParaMorse::Queue.new
+    queue.push("1")
+    queue.push("0")
+    queue.push("5")
+
+    assert_equal "105", queue.pop_all
+  end
 end
