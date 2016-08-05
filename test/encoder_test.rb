@@ -79,4 +79,32 @@ class TestEncoder < Minitest::Test
     assert_equal expected, actual
   end
 
+  def test_encoder_splits_new_lines
+    encoder = ParaMorse::Encoder.new
+    sentence = "This sentence,
+has a lot
+of new
+lines."
+    expected = ["This sentence,","\n","has a lot","\n","of new","\n","lines.","\n"]
+    actual = encoder.split_statement_by_new_lines(sentence)
+
+    assert_equal expected, actual
+  end
+
+  def test_encoder_can_handle_a_single_new_line
+    encoder = ParaMorse::Encoder.new
+    sentence = "\n"
+    expected = ["\n"]
+    actual = encoder.split_statement_by_new_lines(sentence)
+
+    assert_equal expected, actual
+  end
+
+  def test_encoder_can_handle_sentence_with_new_lines
+    encoder = ParaMorse::Encoder.new
+    expected = "101110111000100010111010100011101011101000111011101110001110111000100011101110101011101110000000111011100011101011101110000000101011101000101110100010100010001110100011101010001110111010101110111000000010111011100010001011101010001110101110100011101110111000111011100010000000111000111011101110000000111000101010100010000000111011100010111000111010111010001010101000101000111010001000!0000000"
+    actual = encoder.encode("Welcome, my friend,\nwelcome to the machine!")
+
+    assert_equal expected, actual
+  end
 end

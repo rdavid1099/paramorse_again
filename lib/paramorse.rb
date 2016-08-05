@@ -107,6 +107,15 @@ module ParaMorse
       end
     end
 
+    def split_statement_by_new_lines(statement)
+      return [statement] unless statement.include?("\n")
+      return ["\n"] if statement.include?("\n") && statement.length == 1
+      statement.split("\n").reduce([]) do |result, words|
+        result << words
+        result << "\n"
+      end
+    end
+
     def split_words(words)
       return [words] unless words.include?(" ")
       words.split(" ").reduce([]) do |result, word|
@@ -152,6 +161,34 @@ module ParaMorse
         character == "0" || character == "1"
       end
     end
+  end
+
+  class FileDecoder
+    attr_reader :decoder
+
+    def initialize
+      @decoder = Decoder.new
+    end
+
+    def decode(encoded_filename, decoded_output_filename)
+      encoded_filename
+    end
+
+    def decode_file_contents(encoded_filename)
+      contents = read_file_to_be_decoded(encoded_filename)
+      decoder.decode(contents)
+    end
+
+    def read_file_to_be_decoded(encoded_filename)
+      File.read("./encoded_files/#{encoded_filename}")
+    end
+
+    def write_file(filename, contents)
+      File.open("./decoded_files/#{filename}", "w") do |file|
+        file.write(contents)
+      end
+    end
+
   end
 
   class FileEncoder
