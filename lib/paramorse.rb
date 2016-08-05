@@ -56,10 +56,18 @@ module ParaMorse
 
   class Encoder
     include Translator
+    
     def encode(letter)
-      eng_to_morse_translator[letter]
+      if valid_letter?(letter)
+        eng_to_morse_translator[letter.downcase]
+      else
+        letter
+      end
     end
 
+    def valid_letter?(letter)
+      !eng_to_morse_translator[letter.downcase].nil?
+    end
   end
 
 end
