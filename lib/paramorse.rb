@@ -54,9 +54,9 @@ module ParaMorse
     end
   end
 
-  class Encoder
+  class LetterEncoder
     include Translator
-    
+
     def encode(letter)
       if valid_letter?(letter)
         eng_to_morse_translator[letter.downcase]
@@ -67,6 +67,24 @@ module ParaMorse
 
     def valid_letter?(letter)
       !eng_to_morse_translator[letter.downcase].nil?
+    end
+  end
+
+  class LetterDecoder
+    include Translator
+
+    def decode(morse)
+      if valid_morse?(morse)
+        morse_to_eng_translator[morse]
+      else
+        morse.gsub(/[10]/,"")
+      end
+    end
+
+    def valid_morse?(morse)
+      morse.chars.all? do |character|
+        character == "0" || character == "1"
+      end
     end
   end
 
