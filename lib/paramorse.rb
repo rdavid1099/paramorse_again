@@ -2,6 +2,68 @@ require './lib/translator'
 
 module ParaMorse
 
+  class Encoder
+    attr_reader :letter_encoder
+
+    def initialize
+      @letter_encoder = LetterEncoder.new
+    end
+
+    def encode(word)
+      letters = split_into_letters(word)
+      letters.map.with_index do |letter, index|
+        encode_letter_with_placement(letter, index, letters)
+      end.join
+    end
+
+    def encode_letter_with_placement(letter, index, word)
+      unless index == word.length - 1
+        "#{letter_encoder.encode(letter)}000"
+      else
+        letter_encoder.encode(letter)
+      end
+    end
+
+    def split_into_letters(word)
+      word.chars
+    end
+
+  end
+
+  class LetterEncoder
+    include Translator
+
+    def encode(letter)
+      if valid_letter?(letter)
+        eng_to_morse_translator[letter.downcase]
+      else
+        letter
+      end
+    end
+
+    def valid_letter?(letter)
+      !eng_to_morse_translator[letter.downcase].nil?
+    end
+  end
+
+  class LetterDecoder
+    include Translator
+
+    def decode(morse)
+      if valid_morse?(morse)
+        morse_to_eng_translator[morse]
+      else
+        morse.gsub(/[10]/,"")
+      end
+    end
+
+    def valid_morse?(morse)
+      morse.chars.all? do |character|
+        character == "0" || character == "1"
+      end
+    end
+  end
+
   class Queue
     attr_reader :queue
 
@@ -53,39 +115,4 @@ module ParaMorse
       @queue = Array.new
     end
   end
-
-  class LetterEncoder
-    include Translator
-
-    def encode(letter)
-      if valid_letter?(letter)
-        eng_to_morse_translator[letter.downcase]
-      else
-        letter
-      end
-    end
-
-    def valid_letter?(letter)
-      !eng_to_morse_translator[letter.downcase].nil?
-    end
-  end
-
-  class LetterDecoder
-    include Translator
-
-    def decode(morse)
-      if valid_morse?(morse)
-        morse_to_eng_translator[morse]
-      else
-        morse.gsub(/[10]/,"")
-      end
-    end
-
-    def valid_morse?(morse)
-      morse.chars.all? do |character|
-        character == "0" || character == "1"
-      end
-    end
-  end
-
 end
