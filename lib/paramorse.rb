@@ -30,7 +30,14 @@ module ParaMorse
       @letter_encoder = LetterEncoder.new
     end
 
-    def encode(word)
+    def encode(statement)
+      words = split_words(statement)
+      words.map do |word|
+        encode_word(word)
+      end.join
+    end
+
+    def encode_word(word)
       letters = split_into_letters(word)
       letters.map.with_index do |letter, index|
         encode_letter_with_placement(letter, index, letters)
@@ -42,6 +49,14 @@ module ParaMorse
         "#{letter_encoder.encode(letter)}000"
       else
         letter_encoder.encode(letter)
+      end
+    end
+
+    def split_words(words)
+      return [words] unless words.include?(" ")
+      words.split(" ").reduce([]) do |result, word|
+        result << word
+        result << " "
       end
     end
 

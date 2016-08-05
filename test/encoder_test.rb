@@ -47,4 +47,36 @@ class TestEncoder < Minitest::Test
     assert_equal "11101110001000111000101110001011101010001011101010001010001110101110100010111000!", encoder.encode("MeTaLlIcA!")
   end
 
+  def test_encoder_splits_multiple_words_into_array_of_words
+    encoder = ParaMorse::Encoder.new
+    expected = ["Pink"," ","Floyd", " "]
+    actual = encoder.split_words("Pink Floyd")
+
+    assert_equal expected, actual
+  end
+
+  def test_encoder_splits_multiple_words_with_spec_chars_into_array_of_words
+    encoder = ParaMorse::Encoder.new
+    expected = ["Welcome,"," ","my"," ","friend,"," ","welcome"," ","to"," ","the"," ","machine!"," "]
+    actual = encoder.split_words("Welcome, my friend, welcome to the machine!")
+
+    assert_equal expected, actual
+  end
+
+  def test_encoder_can_encode_multiple_words
+    encoder = ParaMorse::Encoder.new
+    expected = "1011101110100010100011101000111010111000000010101110100010111010100011101110111000111010111011100011101010000000"
+    actual = encoder.encode("pink floyd")
+
+    assert_equal expected, actual
+  end
+
+  def test_encoder_handles_words_with_grammar
+    encoder = ParaMorse::Encoder.new
+    expected = "101110111000100010111010100011101011101000111011101110001110111000100011101110101011101110000000111011100011101011101110000000101011101000101110100010100010001110100011101010001110111010101110111000000010111011100010001011101010001110101110100011101110111000111011100010000000111000111011101110000000111000101010100010000000111011100010111000111010111010001010101000101000111010001000!0000000"
+    actual = encoder.encode("Welcome, my friend, welcome to the machine!")
+
+    assert_equal expected, actual
+  end
+
 end
