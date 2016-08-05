@@ -48,7 +48,8 @@ module ParaMorse
     end
 
     def decode(morse)
-      morse_words = split_morse_words(morse)
+      morse_segments = split_morse_lines(morse)
+      morse_words = split_morse_segments(morse_segments)
       morse_words.map do |word|
         decode_morse_words(word)
       end.join
@@ -59,6 +60,20 @@ module ParaMorse
       morse_letters.map do |morse_letter|
         letter_decoder.decode(morse_letter)
       end.join
+    end
+
+    def split_morse_lines(morse)
+      return [morse] unless morse.include?("\n")
+      morse.split("\n").reduce([]) do |result, word|
+        result << word
+        result << "\n"
+      end
+    end
+
+    def split_morse_segments(morse_segments)
+      morse_segments.map do |segment|
+        split_morse_words(segment)
+      end.flatten
     end
 
     def split_morse_words(words)
@@ -86,7 +101,8 @@ module ParaMorse
     end
 
     def encode(statement)
-      words = split_words(statement)
+      segments = split_statement_by_new_lines(statement)
+      words = split_segments(segments)
       words.map do |word|
         encode_word(word)
       end.join
@@ -101,9 +117,9 @@ module ParaMorse
 
     def encode_letter_with_placement(letter, index, word)
       unless index == word.length - 1
-        "#{letter_encoder.encode(letter)}000"
+       "#{letter_encoder.encode(letter)}000"
       else
-        letter_encoder.encode(letter)
+       letter_encoder.encode(letter)
       end
     end
 
@@ -114,6 +130,12 @@ module ParaMorse
         result << words
         result << "\n"
       end
+    end
+
+    def split_segments(segments)
+      segments.map do |segment|
+        split_words(segment)
+      end.flatten
     end
 
     def split_words(words)
@@ -171,7 +193,8 @@ module ParaMorse
     end
 
     def decode(encoded_filename, decoded_output_filename)
-      encoded_filename
+      contents = decode_file_contents(encoded_filename)
+      write_file(decoded_output_filename, contents)
     end
 
     def decode_file_contents(encoded_filename)
