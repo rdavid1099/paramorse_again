@@ -2,6 +2,27 @@ require './lib/translator'
 
 module ParaMorse
 
+  class Decoder
+    attr_reader :letter_decoder
+
+    def initialize
+      @letter_decoder = LetterDecoder.new
+    end
+
+    def decode(morse)
+      morse_letters = split_morse_letters(morse)
+      morse_letters.map do |morse_letter|
+        letter_decoder.decode(morse_letter)
+      end.join
+    end
+
+    def split_morse_letters(morse)
+      morse.split("000")
+    end
+
+  end
+
+
   class Encoder
     attr_reader :letter_encoder
 
