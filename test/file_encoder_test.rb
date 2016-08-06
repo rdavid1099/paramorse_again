@@ -1,4 +1,4 @@
-require "./lib/paramorse"
+require "./lib/file_encoder"
 require "./test/test_helper"
 
 class TestFileEncoder < Minitest::Test
@@ -13,6 +13,7 @@ class TestFileEncoder < Minitest::Test
     file_enc.write_file("test_encoded.txt", "test")
 
     assert_equal true, File.exist?("./encoded_files/test_encoded.txt")
+    file_enc.encode("test_plain.txt", "test_encoded.txt")
   end
 
   def test_file_encoder_can_receive_name_of_original_file_and_name_of_new_file

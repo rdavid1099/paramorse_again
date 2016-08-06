@@ -1,4 +1,4 @@
-require "./lib/paramorse"
+require "./lib/queue"
 require "./test/test_helper"
 
 class TestQueue < Minitest::Test
@@ -83,13 +83,13 @@ class TestQueue < Minitest::Test
     queue.push("0")
     queue.push("5")
 
-    assert_equal ["0", "1"], queue.pop(2)
+    assert_equal "01", queue.pop(2)
     queue.push("1")
     queue.push("0")
     queue.push("0")
     queue.push("0")
     queue.push("1")
-    assert_equal ["0","1","5"], queue.pop(3)
+    assert_equal "015", queue.pop(3)
     assert_equal 3, queue.count
   end
 

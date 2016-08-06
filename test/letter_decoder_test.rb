@@ -1,4 +1,4 @@
-require "./lib/paramorse"
+require "./lib/letter_decoder"
 require "./test/test_helper"
 
 class TestLetterDecoder < Minitest::Test
