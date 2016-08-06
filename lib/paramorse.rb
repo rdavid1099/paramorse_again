@@ -12,7 +12,22 @@ module ParaMorse
     end
 
     def encode_from_file(file_to_encode, num_of_encoders, output_filename)
-      file_to_encode
+      generate_encoders(num_of_encoders)
+      generate_output_filenames(output_filename, num_of_encoders)
+      assign_characters_to_encoders(file_to_encode)
+      write_files
+    end
+
+    def assign_characters_to_encoders(filename)
+      counter = 0
+      file_contents(filename).chars. each do |character|
+        encoders[counter].receive(character)
+        counter = update_counter(counter)
+      end
+    end
+
+    def file_contents(filename)
+      File.read("./original_files/#{filename}")
     end
 
     def generate_encoders(num_of_encoders)
@@ -34,6 +49,11 @@ module ParaMorse
           file.write(encoders[index].encode)
         end
       end
+    end
+
+    def update_counter(counter)
+      return counter += 1 unless counter + 1 == encoders.length
+      counter = 0
     end
 
   end
