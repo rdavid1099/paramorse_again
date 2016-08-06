@@ -1,4 +1,4 @@
-require "./lib/paramorse"
+require "./lib/stream_encoder"
 require "./test/test_helper"
 
 class TestStreamEncoder < Minitest::Test
@@ -124,6 +124,16 @@ class TestStreamEncoder < Minitest::Test
     stream.receive(" ")
     stream.receive(" ")
     expected = "00000000000000\n101110111010001010001110100011101011100000000000000101011101000101110101000111011101110001110101110111000111010100000000000000"
+
+    assert_equal expected, stream.encode
+  end
+
+  def test_stream_can_encode_several_new_lines
+    stream = ParaMorse::StreamEncoder.new
+    stream.receive("\n")
+    stream.receive("\n")
+    stream.receive("\n")
+    expected = "\n\n\n"
 
     assert_equal expected, stream.encode
   end

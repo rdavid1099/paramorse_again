@@ -1,4 +1,4 @@
-require "./lib/paramorse"
+require "./lib/stream_decoder"
 require "./test/test_helper"
 
 class TestStreamDecoder < Minitest::Test
