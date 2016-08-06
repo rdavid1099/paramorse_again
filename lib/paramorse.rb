@@ -2,6 +2,47 @@ require './lib/translator'
 
 module ParaMorse
 
+  class ParallelDecoder
+    attr_reader :decoders,
+                :filenames
+
+    def initialize
+      @decoders = Array.new
+      @filenames = Array.new
+    end
+
+    def decode_from_files(num_of_decoders, encoded_filename, decode_filename)
+      decode_filename
+    end
+
+    def read_files_contents
+      filenames.each_with_index do |filename, index|
+        load_contents_into_decoder(filename, index)
+      end
+    end
+
+    def load_contents_into_decoder(filename, index)
+      contents = File.read(filename)
+      contents.chars.each do |character|
+        decoders[index].receive(character)
+      end
+    end
+
+    def generate_decoders(num_of_decoders)
+      num_of_decoders.times do
+        decoders << StreamDecoder.new
+      end
+    end
+
+    def generate_encoded_filenames(filename, num_of_decoders)
+      filename.chomp!("*.txt")
+      num_of_decoders.times do |counter|
+        filenames << "./encoded_files/#{filename}#{counter}.txt"
+      end
+    end
+
+  end
+
   class ParallelEncoder
     attr_reader :encoders,
                 :filenames
@@ -55,16 +96,17 @@ module ParaMorse
       return counter += 1 unless counter + 1 == encoders.length
       counter = 0
     end
-
   end
 
   class StreamDecoder
     attr_reader :queue,
-                :decoder
+                :decoder,
+                :morse_words
 
     def initialize
       @queue = Queue.new
       @decoder = Decoder.new
+      @morse_words = Array.new
     end
 
     def receive(digit)
@@ -72,8 +114,48 @@ module ParaMorse
     end
 
     def decode
-      morse_to_decode = queue.pop_all
-      decoder.decode(morse_to_decode)
+      split_white_space
+      morse_words.reduce("") do |result, morse_word|
+        result += decoder.decode(morse_word)
+      end
+    end
+
+    def split_white_space
+      result = String.new
+      until queue.count == 0
+        result = convert_morse_to_white_space(result)
+      end
+      morse_words << result unless result.empty?
+    end
+
+    def convert_morse_to_white_space(result)
+      if queue.peek(4) == ["0","0","0","0"]
+        inject_morse_space_into_morse_words(result)
+      elsif queue.peek == "\n"
+        inject_new_line_into_morse_words(result)
+      else
+        result += queue.pop
+      end
+    end
+
+    def inject_morse_space_into_morse_words(result)
+      if result.empty?
+        morse_words << queue.pop(7)
+      else
+        morse_words << result
+        morse_words << queue.pop(7)
+      end
+      result = ""
+    end
+
+    def inject_new_line_into_morse_words(result)
+      if result.empty?
+        morse_words << queue.pop
+      else
+        morse_words << result
+        morse_words << queue.pop
+      end
+      result = ""
     end
   end
 
@@ -100,7 +182,7 @@ module ParaMorse
     end
 
     def evaluate_word_to_encode(word)
-      if word.include?("0000000")
+      if word == "0000000"
         word
       else
         encoder.encode(word)
@@ -143,7 +225,6 @@ module ParaMorse
       end
       result = ""
     end
-
   end
 
   class Decoder
@@ -169,7 +250,7 @@ module ParaMorse
     end
 
     def split_morse_lines(morse)
-      return [morse] unless morse.include?("\n")
+      return [morse] if morse == "\n" || !morse.include?("\n")
       morse.split("\n").reduce([]) do |result, word|
         result << word
         result << "\n"
@@ -183,7 +264,7 @@ module ParaMorse
     end
 
     def split_morse_words(words)
-      return [words] unless words.include?("0000000")
+      return [words] if words == "0000000" || !words.include?("0000000")
       words.split("0000000").reduce([]) do |result, word|
         result << word
         result << "0000000"
@@ -317,7 +398,6 @@ module ParaMorse
         file.write(contents)
       end
     end
-
   end
 
   class FileEncoder
@@ -363,7 +443,7 @@ module ParaMorse
       if amount == 1
         queue.shift
       else
-        pop_multiple(amount)
+        pop_multiple(amount).join
       end
     end
 
