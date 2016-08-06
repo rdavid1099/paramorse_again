@@ -2,6 +2,42 @@ require './lib/translator'
 
 module ParaMorse
 
+  class ParallelEncoder
+    attr_reader :encoders,
+                :filenames
+
+    def initialize
+      @encoders = Array.new
+      @filenames = Array.new
+    end
+
+    def encode_from_file(file_to_encode, num_of_encoders, output_filename)
+      file_to_encode
+    end
+
+    def generate_encoders(num_of_encoders)
+      num_of_encoders.times do
+        encoders << StreamEncoder.new
+      end
+    end
+
+    def generate_output_filenames(filename, num_of_encoders)
+      filename.chomp!("*.txt")
+      num_of_encoders.times do |counter|
+        filenames << "./encoded_files/#{filename}#{counter}.txt"
+      end
+    end
+
+    def write_files
+      filenames.each_with_index do |filename, index|
+        File.open(filename, "w") do |file|
+          file.write(encoders[index].encode)
+        end
+      end
+    end
+
+  end
+
   class StreamDecoder
     attr_reader :queue,
                 :decoder
@@ -23,11 +59,13 @@ module ParaMorse
 
   class StreamEncoder
     attr_reader :queue,
-                :encoder
+                :encoder,
+                :words
 
     def initialize
       @queue = Queue.new
       @encoder = Encoder.new
+      @words = Array.new
     end
 
     def receive(letter)
@@ -35,9 +73,57 @@ module ParaMorse
     end
 
     def encode
-      words_to_encode = queue.pop_all
-      encoder.encode(words_to_encode)
+      split_words
+      words.reduce("") do |result, word|
+        result += evaluate_word_to_encode(word)
+      end
     end
+
+    def evaluate_word_to_encode(word)
+      if word.include?("0000000")
+        word
+      else
+        encoder.encode(word)
+      end
+    end
+
+    def split_words
+      last_word = queue.pop_all.chars.reduce("") do |result, character|
+        result = convert_white_space_to_morse(result, character)
+      end
+      words << last_word unless last_word.empty?
+    end
+
+    def convert_white_space_to_morse(result, character)
+      if character == " "
+        inject_space_into_words(result)
+      elsif character == "\n"
+        inject_new_line_into_words(result)
+      else
+        result += character
+      end
+    end
+
+    def inject_space_into_words(result)
+      if result.empty?
+        words << "0000000"
+      else
+        words << result
+        words << "0000000"
+      end
+      result = ""
+    end
+
+    def inject_new_line_into_words(result)
+      if result.empty?
+        words << "\n"
+      else
+        words << result
+        words << "0000000"
+      end
+      result = ""
+    end
+
   end
 
   class Decoder
